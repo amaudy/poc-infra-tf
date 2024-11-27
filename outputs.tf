@@ -16,4 +16,14 @@ output "private_subnet_ids" {
 output "nat_gateway_ip" {
   description = "Public IP address of the NAT Gateway"
   value       = module.networks.nat_gateway_ip
+}
+
+output "public_subnet_names" {
+  description = "Names of the public subnets"
+  value       = module.networks.public_subnet_names
+}
+
+output "private_subnet_names" {
+  description = "Names of the private subnets"
+  value       = module.networks.private_subnet_names
 } 

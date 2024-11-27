@@ -16,4 +16,14 @@ output "private_subnet_ids" {
 output "nat_gateway_ip" {
   description = "Public IP address of the NAT Gateway"
   value       = aws_eip.nat.public_ip
+}
+
+output "public_subnet_names" {
+  description = "Names of the public subnets"
+  value       = aws_subnet.public[*].tags.Name
+}
+
+output "private_subnet_names" {
+  description = "Names of the private subnets"
+  value       = aws_subnet.private[*].tags.Name
 } 
