@@ -1,0 +1,39 @@
+variables:
+  AWS_DEFAULT_REGION: us-east-1
+  ECR_REPO_URL: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${CI_PROJECT_NAME}-${CI_ENVIRONMENT_NAME}
+  DOCKER_IMAGE: ${ECR_REPO_URL}:${CI_COMMIT_SHORT_SHA}
+
+stages:
+  - build
+
+build-and-push:
+  stage: build
+  image: 
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    # Install Docker
+    - amazon-linux-extras install docker
+    - aws --version
+    - docker --version
+    # Login to ECR
+    - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}
+  script:
+    # Build and push Docker image
+    - cd modules/poc-api/src
+    - docker build -t ${DOCKER_IMAGE} .
+    - docker push ${DOCKER_IMAGE}
+    # Tag as latest
+    - docker tag ${DOCKER_IMAGE} ${ECR_REPO_URL}:latest
+    - docker push ${ECR_REPO_URL}:latest
+  environment:
+    name: dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - modules/poc-api/src/**/* 
