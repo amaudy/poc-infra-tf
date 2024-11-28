@@ -44,3 +44,12 @@ module "ecs" {
   environment        = var.environment
   log_retention_days = var.log_retention_days
 }
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  project_name         = var.project_name
+  environment         = var.environment
+  image_retention_count = 20  # Keep last 20 images
+  scan_on_push        = false
+}
