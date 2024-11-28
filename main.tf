@@ -53,3 +53,18 @@ module "ecr" {
   image_retention_count = 20  # Keep last 20 images
   scan_on_push        = false
 }
+
+module "poc_api" {
+  source = "./modules/poc-api"
+
+  project_name      = var.project_name
+  environment       = var.environment
+  vpc_id           = module.networks.vpc_id
+  private_subnet_ids = module.networks.private_subnet_ids
+  public_subnet_ids = module.networks.public_subnet_ids
+  ecs_cluster_id   = module.ecs.cluster_id
+  container_image  = var.api_image
+  cpu             = var.api_cpu
+  memory          = var.api_memory
+  desired_count   = var.api_desired_count
+}
