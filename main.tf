@@ -27,16 +27,6 @@ module "networks" {
   project_name = var.project_name
 }
 
-module "app_server" {
-  source = "./modules/app-server"
-
-  project_name       = var.project_name
-  vpc_id            = module.networks.vpc_id
-  private_subnet_ids = module.networks.private_subnet_ids
-  public_subnet_ids  = module.networks.public_subnet_ids
-  instance_type     = var.instance_type
-}
-
 module "ecs" {
   source = "./modules/ecs"
 
