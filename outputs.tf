@@ -61,4 +61,19 @@ output "ecr_repository_name" {
 output "api_url" {
   description = "The URL of the POC API"
   value       = module.poc_api.api_url
+}
+
+output "filesrepo_bucket_id" {
+  description = "The name of the filesrepo bucket"
+  value       = module.filesrepo.bucket_id
+}
+
+output "filesrepo_bucket_arn" {
+  description = "The ARN of the filesrepo bucket"
+  value       = module.filesrepo.bucket_arn
+}
+
+output "filesrepo_kms_key_arn" {
+  description = "The ARN of the filesrepo KMS key"
+  value       = module.filesrepo.kms_key_arn
 } 

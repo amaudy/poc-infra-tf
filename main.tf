@@ -68,3 +68,10 @@ module "poc_api" {
   memory          = var.api_memory
   desired_count   = var.api_desired_count
 }
+
+module "filesrepo" {
+  source = "./modules/filesrepo"
+
+  project_name = var.project_name
+  environment  = var.environment
+}
