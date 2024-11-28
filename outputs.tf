@@ -26,4 +26,19 @@ output "public_subnet_names" {
 output "private_subnet_names" {
   description = "Names of the private subnets"
   value       = module.networks.private_subnet_names
+}
+
+output "app_instance_id" {
+  description = "ID of the EC2 instance"
+  value       = module.app_server.instance_id
+}
+
+output "app_instance_private_ip" {
+  description = "Private IP of the EC2 instance"
+  value       = module.app_server.instance_private_ip
+}
+
+output "app_alb_dns_name" {
+  description = "DNS name of the Application Load Balancer"
+  value       = module.app_server.alb_dns_name
 } 
