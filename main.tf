@@ -36,3 +36,11 @@ module "app_server" {
   public_subnet_ids  = module.networks.public_subnet_ids
   instance_type     = var.instance_type
 }
+
+module "ecs" {
+  source = "./modules/ecs"
+
+  project_name       = var.project_name
+  environment        = var.environment
+  log_retention_days = var.log_retention_days
+}

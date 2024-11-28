@@ -41,4 +41,9 @@ output "app_instance_private_ip" {
 output "app_alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = module.app_server.alb_dns_name
+}
+
+output "ecs_cluster_name" {
+  description = "Name of the ECS cluster"
+  value       = module.ecs.cluster_name
 } 
