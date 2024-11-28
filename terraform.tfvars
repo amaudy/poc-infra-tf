@@ -1,2 +1,2 @@
 aws_region   = "us-east-1"
-project_name = "poc-filesharing"
+project_name = "poc-devops"
