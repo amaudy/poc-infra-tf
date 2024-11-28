@@ -33,7 +33,7 @@ build-and-push:
     - docker push ${ECR_REPO_URL}:latest
   environment:
     name: dev
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      changes:
-        - modules/poc-api/src/**/* 
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == "main"
+  #     changes:
+  #       - modules/poc-api/src/**/* 
