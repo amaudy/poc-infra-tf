@@ -145,6 +145,8 @@ terraform-plan:
       when: always
   needs:
     - terraform-validate
+  dependencies:
+    - terraform-validate
 
 terraform-apply:
   extends: .terraform
