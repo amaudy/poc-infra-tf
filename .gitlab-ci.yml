@@ -88,13 +88,37 @@ build-release:
 
 .terraform:
   image:
-    name: hashicorp/terraform:1.6
+    name: alpine:3.19
     entrypoint: [""]
+  variables:
+    TERRAFORM_VERSION: "1.6.0"
+    AWS_ACCESS_KEY_ID: ${TF_AWS_ACCESS_KEY_ID}
+    AWS_SECRET_ACCESS_KEY: ${TF_AWS_SECRET_ACCESS_KEY}
+    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    AWS_ROLE_ARN: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/terraform-gitlab-role"
+    AWS_SESSION_NAME: "GitLabCI-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
   cache:
     key: terraform
     paths:
       - ${TF_ROOT}/.terraform
   before_script:
+    - apk add --no-cache curl unzip python3 py3-pip jq
+    - pip3 install --no-cache-dir awscli
+    - curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    - unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    - mv terraform /usr/local/bin/
+    - rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    - aws configure set aws_access_key_id ${TF_AWS_ACCESS_KEY_ID}
+    - aws configure set aws_secret_access_key ${TF_AWS_SECRET_ACCESS_KEY}
+    - aws configure set region ${AWS_DEFAULT_REGION}
+    - |
+      CREDENTIALS=$(aws sts assume-role \
+        --role-arn "${AWS_ROLE_ARN}" \
+        --role-session-name "${AWS_SESSION_NAME}" \
+        --duration-seconds 3600)
+    - export AWS_ACCESS_KEY_ID=$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')
+    - export AWS_SECRET_ACCESS_KEY=$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')
+    - export AWS_SESSION_TOKEN=$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')
     - cd ${TF_ROOT}
 
 terraform-validate:
