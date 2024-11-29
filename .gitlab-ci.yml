@@ -59,8 +59,6 @@ build-feature:
     - docker tag ${DOCKER_IMAGE} ${ECR_REPO_URL}:latest
     - docker push ${ECR_REPO_URL}:latest
   extends: .rules-feature
-  environment:
-    name: dev
 
 build-release:
   stage: build
@@ -87,8 +85,6 @@ build-release:
     - docker tag ${DOCKER_IMAGE} ${ECR_REPO_URL}:latest
     - docker push ${ECR_REPO_URL}:latest
   extends: .rules-release
-  environment:
-    name: prod
 
 .terraform:
   image: hashicorp/terraform:1.6
@@ -122,9 +118,6 @@ terraform-plan:
   rules:
     - if: $ENVIRONMENT
       when: manual
-  environment:
-    name: $ENVIRONMENT
-    deployment_tier: $ENVIRONMENT
   needs:
     - terraform-validate
 
@@ -137,9 +130,6 @@ terraform-apply:
   rules:
     - if: $ENVIRONMENT
       when: manual
-  environment:
-    name: $ENVIRONMENT
-    deployment_tier: $ENVIRONMENT
   dependencies:
     - terraform-plan
   needs:
