@@ -3,11 +3,37 @@ variables:
   AWS_ACCOUNT_ID: "058264373862"
   ECR_REPO_URL: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${CI_PROJECT_NAME}-${CI_ENVIRONMENT_NAME}
   DOCKER_IMAGE: ${ECR_REPO_URL}:${CI_COMMIT_SHORT_SHA}
+  TF_ROOT: ${CI_PROJECT_DIR}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+# Reusable workflow rules
+.rules-dev:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+.rules-dev-manual:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
+
+.rules-prod:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+.rules-prod-manual:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
 
 stages:
   - build
+  - validate
+  - plan
+  - apply
 
-build-and-push:
+# Build Docker image
+.build-template:
   stage: build
   image: 
     name: amazon/aws-cli:latest
@@ -18,27 +44,102 @@ build-and-push:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   before_script:
-    # Configure AWS credentials
     - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
     - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
     - aws configure set region ${AWS_DEFAULT_REGION}
-    # Install Docker
     - amazon-linux-extras install docker
     - aws --version
     - docker --version
-    # Login to ECR
     - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}
   script:
-    # Build and push Docker image
     - cd modules/poc-api/src
     - docker build -t ${DOCKER_IMAGE} .
     - docker push ${DOCKER_IMAGE}
-    # Tag as latest
     - docker tag ${DOCKER_IMAGE} ${ECR_REPO_URL}:latest
     - docker push ${ECR_REPO_URL}:latest
+
+build-dev:
+  extends: 
+    - .build-template
+    - .rules-dev
   environment:
     name: dev
-  # rules:
-  #   - if: $CI_COMMIT_BRANCH == "main"
-  #     changes:
-  #       - modules/poc-api/src/**/* 
+
+build-prod:
+  extends: 
+    - .build-template
+    - .rules-prod
+  environment:
+    name: prod
+
+.terraform:
+  image: hashicorp/terraform:1.6
+  cache:
+    key: terraform
+    paths:
+      - ${TF_ROOT}/.terraform
+  before_script:
+    - cd ${TF_ROOT}
+
+terraform-validate:
+  extends: .terraform
+  stage: validate
+  script:
+    - terraform init -backend=false
+    - terraform validate
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+.terraform-plan:
+  extends: .terraform
+  stage: plan
+  script:
+    - terraform init -backend-config=backends/${CI_ENVIRONMENT_NAME}.hcl
+    - terraform plan -out=plan.tfplan
+  artifacts:
+    paths:
+      - plan.tfplan
+    expire_in: 1 week
+
+terraform-plan-dev:
+  extends: 
+    - .terraform-plan
+    - .rules-dev
+  environment:
+    name: dev
+  needs:
+    - build-dev
+
+terraform-plan-prod:
+  extends: 
+    - .terraform-plan
+    - .rules-prod
+  environment:
+    name: prod
+  needs:
+    - build-prod
+
+.terraform-apply:
+  extends: .terraform
+  stage: apply
+  script:
+    - terraform init -backend-config=backends/${CI_ENVIRONMENT_NAME}.hcl
+    - terraform apply -auto-approve plan.tfplan
+
+terraform-apply-dev:
+  extends: 
+    - .terraform-apply
+    - .rules-dev-manual
+  environment:
+    name: dev
+  dependencies:
+    - terraform-plan-dev
+
+terraform-apply-prod:
+  extends: 
+    - .terraform-apply
+    - .rules-prod-manual
+  environment:
+    name: prod
+  dependencies:
+    - terraform-plan-prod
