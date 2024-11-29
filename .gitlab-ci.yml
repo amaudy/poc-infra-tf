@@ -87,7 +87,9 @@ build-release:
   extends: .rules-release
 
 .terraform:
-  image: hashicorp/terraform:1.6
+  image:
+    name: hashicorp/terraform:1.6
+    entrypoint: [""]
   cache:
     key: terraform
     paths:
