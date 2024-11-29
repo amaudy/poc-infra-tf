@@ -126,6 +126,7 @@ terraform-plan:
   stage: plan
   script:
     - echo "${ENVIRONMENT}"
+    - aws configure list
     - aws s3 ls
     - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
     - terraform plan -var-file=tfvars/${ENVIRONMENT}.tfvars -out=plan.tfplan
