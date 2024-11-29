@@ -142,8 +142,14 @@ terraform-plan:
       - plan.tfplan
     expire_in: 1 week
   rules:
-    - if: $ENVIRONMENT
-      when: manual
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'  # Run on merge requests
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "main"'  # Run on main branch
+      when: always
+    - if: '$CI_COMMIT_BRANCH =~ /^release-/'  # Run on release branches
+      when: always
+    - if: '$CI_COMMIT_BRANCH =~ /-[A-Z]{2,}-[0-9]+/'  # Run on feature branches
+      when: always
   needs:
     - terraform-validate
 
