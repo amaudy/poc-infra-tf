@@ -8,23 +8,17 @@ variables:
   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 
 # Reusable workflow rules
-.rules-dev:
+.rules-feature:
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH =~ /-[A-Z]{2,}-[0-9]+/  # Matches feature branches like "feature-JIRA-123"
 
-.rules-dev-manual:
+.rules-release:
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual
+    - if: $CI_COMMIT_BRANCH =~ /^release-/  # Matches branches starting with "release-"
 
-.rules-prod:
+.rules-merge-to-release:
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-
-.rules-prod-manual:
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^release-/
 
 stages:
   - build
@@ -32,8 +26,8 @@ stages:
   - plan
   - apply
 
-# Build Docker image
-.build-template:
+# Build jobs for different scenarios
+build-feature:
   stage: build
   image: 
     name: amazon/aws-cli:latest
@@ -57,18 +51,35 @@ stages:
     - docker push ${DOCKER_IMAGE}
     - docker tag ${DOCKER_IMAGE} ${ECR_REPO_URL}:latest
     - docker push ${ECR_REPO_URL}:latest
-
-build-dev:
-  extends: 
-    - .build-template
-    - .rules-dev
+  extends: .rules-feature
   environment:
     name: dev
 
-build-prod:
-  extends: 
-    - .build-template
-    - .rules-prod
+build-release:
+  stage: build
+  image: 
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+    - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+    - aws configure set region ${AWS_DEFAULT_REGION}
+    - amazon-linux-extras install docker
+    - aws --version
+    - docker --version
+    - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_URL}
+  script:
+    - cd modules/poc-api/src
+    - docker build -t ${DOCKER_IMAGE} .
+    - docker push ${DOCKER_IMAGE}
+    - docker tag ${DOCKER_IMAGE} ${ECR_REPO_URL}:latest
+    - docker push ${ECR_REPO_URL}:latest
+  extends: .rules-release
   environment:
     name: prod
 
@@ -88,7 +99,8 @@ terraform-validate:
     - terraform init -backend=false
     - terraform validate
   rules:
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_BRANCH =~ /-[A-Z]{2,}-[0-9]+/ || $CI_COMMIT_BRANCH =~ /^release-/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^release-/
 
 .terraform-plan:
   extends: .terraform
@@ -101,23 +113,30 @@ terraform-validate:
       - plan.tfplan
     expire_in: 1 week
 
-terraform-plan-dev:
+terraform-plan-feature:
   extends: 
     - .terraform-plan
-    - .rules-dev
+    - .rules-feature
   environment:
     name: dev
   needs:
-    - build-dev
+    - build-feature
 
-terraform-plan-prod:
+terraform-plan-release:
   extends: 
     - .terraform-plan
-    - .rules-prod
+    - .rules-release
   environment:
     name: prod
   needs:
-    - build-prod
+    - build-release
+
+terraform-plan-mr:
+  extends: 
+    - .terraform-plan
+    - .rules-merge-to-release
+  environment:
+    name: prod
 
 .terraform-apply:
   extends: .terraform
@@ -126,20 +145,20 @@ terraform-plan-prod:
     - terraform init -backend-config=backends/${CI_ENVIRONMENT_NAME}.hcl
     - terraform apply -auto-approve plan.tfplan
 
-terraform-apply-dev:
+terraform-apply-feature:
   extends: 
     - .terraform-apply
-    - .rules-dev-manual
+    - .rules-feature
   environment:
     name: dev
   dependencies:
-    - terraform-plan-dev
+    - terraform-plan-feature
 
-terraform-apply-prod:
+terraform-apply-release:
   extends: 
     - .terraform-apply
-    - .rules-prod-manual
+    - .rules-release
   environment:
     name: prod
   dependencies:
-    - terraform-plan-prod
+    - terraform-plan-release
