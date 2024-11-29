@@ -125,7 +125,6 @@ terraform-plan:
   extends: .terraform
   stage: plan
   script:
-    - aws s3 ls
     - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
     - terraform plan -var-file=tfvars/${ENVIRONMENT}.tfvars -out=plan.tfplan
   artifacts:
