@@ -125,6 +125,7 @@ terraform-plan:
   extends: .terraform
   stage: plan
   script:
+    - echo "${ENVIRONMENT}"
     - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
     - terraform plan -var-file=tfvars/${ENVIRONMENT}.tfvars -out=plan.tfplan
   artifacts:
