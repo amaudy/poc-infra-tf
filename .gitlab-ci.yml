@@ -127,13 +127,13 @@ terraform-plan:
   script:
     - echo "${ENVIRONMENT}"
     - env > env.txt
-    - aws configure list
-    - aws s3 ls
-    - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
-    - terraform plan -var-file=tfvars/${ENVIRONMENT}.tfvars -out=plan.tfplan
+    # - aws configure list
+    # - aws s3 ls
+    # - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
+    # - terraform plan -var-file=tfvars/${ENVIRONMENT}.tfvars -out=plan.tfplan
   artifacts:
     paths:
-      - plan.tfplan
+      # - plan.tfplan
       - env.txt
     expire_in: 1 days
   rules:
@@ -149,16 +149,16 @@ terraform-plan:
     - job: terraform-validate
       artifacts: false
 
-terraform-apply:
-  extends: .terraform
-  stage: apply
-  script:
-    - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
-    - terraform apply -auto-approve plan.tfplan
-  rules:
-    - if: $ENVIRONMENT
-      when: manual
-  dependencies:
-    - terraform-plan
-  needs:
-    - terraform-plan
+# terraform-apply:
+#   extends: .terraform
+#   stage: apply
+#   script:
+#     - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
+#     - terraform apply -auto-approve plan.tfplan
+#   rules:
+#     - if: $ENVIRONMENT
+#       when: manual
+#   dependencies:
+#     - terraform-plan
+#   needs:
+#     - terraform-plan
