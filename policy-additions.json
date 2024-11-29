@@ -1,0 +1,200 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeAddressesAttribute",
+                "ec2:DescribeRouteTables",
+                "ec2:CreateRoute",
+                "ec2:DeleteRoute",
+                "ec2:CreateRouteTable",
+                "ec2:DeleteRouteTable",
+                "ec2:AssociateRouteTable",
+                "ec2:DisassociateRouteTable",
+                "ec2:AllocateAddress",
+                "ec2:ReleaseAddress",
+                "ec2:AssociateAddress",
+                "ec2:DisassociateAddress",
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeAddresses",
+                "ec2:CreateVpc",
+                "ec2:DeleteVpc",
+                "ec2:CreateTags",
+                "ec2:DeleteTags",
+                "ec2:DescribeVpcAttribute",
+                "ec2:CreateNatGateway",
+                "ec2:DeleteNatGateway",
+                "ec2:DescribeNatGateways",
+                "ec2:CreateSubnet",
+                "ec2:DeleteSubnet",
+                "ec2:DescribeSubnets",
+                "ec2:ModifySubnetAttribute",
+                "ec2:CreateInternetGateway",
+                "ec2:DeleteInternetGateway",
+                "ec2:AttachInternetGateway",
+                "ec2:DetachInternetGateway",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeSecurityGroups"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:GetKeyPolicy",
+                "kms:CreateKey",
+                "kms:ScheduleKeyDeletion",
+                "kms:ListKeys",
+                "kms:ListAliases",
+                "kms:CreateAlias",
+                "kms:DeleteAlias",
+                "kms:UpdateKeyDescription",
+                "kms:PutKeyPolicy",
+                "kms:DescribeKey",
+                "kms:GetKeyRotationStatus",
+                "kms:ListResourceTags"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:DescribeListenerAttributes",
+                "elasticloadbalancing:ModifyListener",
+                "elasticloadbalancing:CreateLoadBalancer",
+                "elasticloadbalancing:DeleteLoadBalancer",
+                "elasticloadbalancing:DescribeLoadBalancers",
+                "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                "elasticloadbalancing:CreateTargetGroup",
+                "elasticloadbalancing:DeleteTargetGroup",
+                "elasticloadbalancing:DescribeTargetGroups",
+                "elasticloadbalancing:ModifyTargetGroup",
+                "elasticloadbalancing:RegisterTargets",
+                "elasticloadbalancing:DeregisterTargets",
+                "elasticloadbalancing:SetSecurityGroups",
+                "elasticloadbalancing:DescribeTargetGroupAttributes",
+                "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                "elasticloadbalancing:DescribeTags",
+                "elasticloadbalancing:DescribeListeners"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+                "s3:GetBucketVersioning",
+                "s3:PutBucketVersioning",
+                "s3:CreateBucket",
+                "s3:DeleteBucket",
+                "s3:GetBucketPolicy",
+                "s3:PutBucketPolicy",
+                "s3:PutEncryptionConfiguration",
+                "s3:GetEncryptionConfiguration",
+                "s3:PutBucketAcl",
+                "s3:GetBucketAcl",
+                "s3:GetBucketCORS",
+                "s3:GetBucketWebsite",
+                "s3:PutBucketWebsite",
+                "s3:GetAccelerateConfiguration",
+                "s3:GetBucketRequestPayment",
+                "s3:GetBucketLogging",
+                "s3:PutBucketLogging",
+                "s3:GetLifecycleConfiguration",
+                "s3:GetReplicationConfiguration",
+                "s3:GetBucketObjectLockConfiguration",
+                "s3:PutBucketObjectLockConfiguration",
+                "s3:GetBucketTagging",
+                "s3:PutBucketTagging",
+                "s3:GetBucketPublicAccessBlock"
+            ],
+            "Resource": [
+                "arn:aws:s3:::addskills-tf",
+                "arn:aws:s3:::addskills-tf/*",
+                "arn:aws:s3:::poc-devops-*",
+                "arn:aws:s3:::poc-devops-*/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:CreateTable",
+                "dynamodb:DeleteTable"
+            ],
+            "Resource": "arn:aws:dynamodb:us-east-1:058264373862:table/terraform-state-lock-poc-devops-*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:DescribeRepositories",
+                "ecr:CreateRepository",
+                "ecr:DeleteRepository",
+                "ecr:PutImage",
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:ListTagsForResource",
+                "ecr:GetLifecyclePolicy"
+            ],
+            "Resource": "arn:aws:ecr:us-east-1:058264373862:repository/poc-devops-*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:DeleteLogGroup",
+                "logs:DescribeLogGroups",
+                "logs:CreateLogStream",
+                "logs:DeleteLogStream",
+                "logs:PutLogEvents",
+                "logs:GetLogEvents",
+                "logs:ListTagsForResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecs:CreateCluster",
+                "ecs:DeleteCluster",
+                "ecs:DescribeClusters",
+                "ecs:ListClusters",
+                "ecs:CreateService",
+                "ecs:DeleteService",
+                "ecs:UpdateService",
+                "ecs:DescribeServices",
+                "ecs:RegisterTaskDefinition",
+                "ecs:DeregisterTaskDefinition",
+                "ecs:ListTaskDefinitions",
+                "ecs:DescribeTaskDefinition",
+                "ecs:ListTasks",
+                "ecs:DescribeTasks"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:GetRole",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:ListRolePolicies",
+                "iam:ListAttachedRolePolicies",
+                "iam:PassRole"
+            ],
+            "Resource": "arn:aws:iam::058264373862:role/poc-devops-*"
+        }
+    ]
+} 
