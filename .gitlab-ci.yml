@@ -64,3 +64,5 @@ test-terraform:
   script:
     - aws --version
     - terraform --version
+    - terraform init -backend-config=backends/dev.hcl
+    - terraform plan -var-file=tfvars/dev.tfvars
