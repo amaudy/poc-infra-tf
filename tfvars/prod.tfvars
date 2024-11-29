@@ -1,0 +1,9 @@
+aws_region   = "us-east-1"
+project_name = "poc-devops"
+instance_type = "t3.large"
+environment   = "prod"
+log_retention_days = 3
+api_image = "058264373862.dkr.ecr.us-east-1.amazonaws.com/poc-devops-dev:a4151bb5"
+api_cpu = 256
+api_memory = 512
+api_desired_count = 2

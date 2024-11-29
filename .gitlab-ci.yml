@@ -6,6 +6,13 @@ variables:
   TF_ROOT: ${CI_PROJECT_DIR}
   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+  ENVIRONMENT:
+    value: dev
+    options:
+      - dev
+      - staging
+      - prod
+    description: The environment to deploy
 
 # Reusable workflow rules
 .rules-feature:
@@ -99,66 +106,41 @@ terraform-validate:
     - terraform init -backend=false
     - terraform validate
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /-[A-Z]{2,}-[0-9]+/ || $CI_COMMIT_BRANCH =~ /^release-/
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^release-/
+    - if: $CI_COMMIT_BRANCH
+      when: always
 
-.terraform-plan:
+terraform-plan:
   extends: .terraform
   stage: plan
   script:
-    - terraform init -backend-config=backends/${CI_ENVIRONMENT_NAME}.hcl
-    - terraform plan -out=plan.tfplan
+    - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
+    - terraform plan -var-file=tfvars/${ENVIRONMENT}.tfvars -out=plan.tfplan
   artifacts:
     paths:
       - plan.tfplan
     expire_in: 1 week
-
-terraform-plan-feature:
-  extends: 
-    - .terraform-plan
-    - .rules-feature
+  rules:
+    - if: $ENVIRONMENT
+      when: manual
   environment:
-    name: dev
+    name: $ENVIRONMENT
+    deployment_tier: $ENVIRONMENT
   needs:
-    - build-feature
+    - terraform-validate
 
-terraform-plan-release:
-  extends: 
-    - .terraform-plan
-    - .rules-release
-  environment:
-    name: prod
-  needs:
-    - build-release
-
-terraform-plan-mr:
-  extends: 
-    - .terraform-plan
-    - .rules-merge-to-release
-  environment:
-    name: prod
-
-.terraform-apply:
+terraform-apply:
   extends: .terraform
   stage: apply
   script:
-    - terraform init -backend-config=backends/${CI_ENVIRONMENT_NAME}.hcl
+    - terraform init -backend-config=backends/${ENVIRONMENT}.hcl
     - terraform apply -auto-approve plan.tfplan
-
-terraform-apply-feature:
-  extends: 
-    - .terraform-apply
-    - .rules-feature
+  rules:
+    - if: $ENVIRONMENT
+      when: manual
   environment:
-    name: dev
+    name: $ENVIRONMENT
+    deployment_tier: $ENVIRONMENT
   dependencies:
-    - terraform-plan-feature
-
-terraform-apply-release:
-  extends: 
-    - .terraform-apply
-    - .rules-release
-  environment:
-    name: prod
-  dependencies:
-    - terraform-plan-release
+    - terraform-plan
+  needs:
+    - terraform-plan
