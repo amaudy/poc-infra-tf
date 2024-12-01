@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Your API endpoint (replace with your ALB DNS)
-API_ENDPOINT="http://your-alb-dns/api/generate-upload-url"
+API_ENDPOINT="http://localhost:8000/api/generate-upload-url"
 
 # Create test file
 echo "Hello, this is a test file" > test.txt
