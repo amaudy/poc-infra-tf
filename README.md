@@ -6,3 +6,16 @@
 - FastAPI workload deployed in ECS.
 - Load balancer in front of the ECS service.
 - Cloudwatch logs and metrics.
+
+
+## Terraform
+
+terraform init
+
+```bash
+terraform init -backend-config=backends/dev.hcl 
+```
+
+```bash
+
+```

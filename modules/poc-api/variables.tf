@@ -55,4 +55,14 @@ variable "desired_count" {
   description = "Desired number of tasks"
   type        = number
   default     = 2
+}
+
+variable "filesrepo_bucket_name" {
+  description = "Name of the S3 bucket for file storage"
+  type        = string
+}
+
+variable "filesrepo_bucket_arn" {
+  description = "ARN of the S3 bucket for file storage"
+  type        = string
 } 

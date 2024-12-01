@@ -21,6 +21,30 @@ resource "aws_iam_role_policy_attachment" "execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# Add these permissions to your ECS task role
+resource "aws_iam_role_policy" "s3_access" {
+  name = "s3-presigned-url-access"
+  role = aws_iam_role.execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "${var.filesrepo_bucket_arn}",
+          "${var.filesrepo_bucket_arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
 # Security Groups
 resource "aws_security_group" "api_service" {
   name        = "${var.project_name}-api-service-${var.environment}"
@@ -132,6 +156,17 @@ resource "aws_ecs_task_definition" "api" {
           "awslogs-stream-prefix" = "api"
         }
       }
+
+      environment = [
+        {
+          name  = "S3_BUCKET_NAME"
+          value = var.filesrepo_bucket_name
+        },
+        {
+          name  = "AWS_DEFAULT_REGION"
+          value = data.aws_region.current.name
+        }
+      ]
     }
   ])
 }

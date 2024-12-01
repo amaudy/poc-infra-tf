@@ -16,4 +16,12 @@ output "kms_key_id" {
 output "kms_key_arn" {
   description = "The ARN of the KMS key"
   value       = aws_kms_key.filesrepo.arn
+}
+
+output "bucket_name" {
+  value = aws_s3_bucket.filesrepo.id
+}
+
+output "files_bucket_arn" {
+  value = aws_s3_bucket.filesrepo.arn
 } 

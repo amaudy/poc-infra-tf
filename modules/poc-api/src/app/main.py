@@ -1,28 +1,21 @@
 from fastapi import FastAPI
-import uvicorn
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from .routes import upload
 
-app = FastAPI()
+app = FastAPI(title="POC API")
 
-API_VERSION = "1.1"
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Restrict this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class HealthCheck(BaseModel):
-    status: str
-    version: str
+# Include routers
+app.include_router(upload.router, prefix="/api", tags=["upload"])
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Hello from POC API",
-        "version": API_VERSION
-    }
-
-@app.get("/health", response_model=HealthCheck)
-async def health():
-    return HealthCheck(
-        status="healthy",
-        version=API_VERSION
-    )
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"} 

@@ -59,6 +59,8 @@ module "poc_api" {
   cpu             = var.api_cpu
   memory          = var.api_memory
   desired_count   = var.api_desired_count
+  filesrepo_bucket_name = module.filesrepo.bucket_name
+  filesrepo_bucket_arn  = module.filesrepo.bucket_arn
 }
 
 module "filesrepo" {
