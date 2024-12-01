@@ -92,7 +92,7 @@ resource "aws_lb" "api" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.api_alb.id]
-  subnets           = var.public_subnet_ids
+  subnets            = var.public_subnet_ids
 }
 
 resource "aws_lb_target_group" "api" {
@@ -106,10 +106,10 @@ resource "aws_lb_target_group" "api" {
     enabled             = true
     healthy_threshold   = 2
     interval            = 30
-    matcher            = "200"
-    path               = "/health"
-    port               = "traffic-port"
-    timeout            = 5
+    matcher             = "200"
+    path                = "/health"
+    port                = "traffic-port"
+    timeout             = 5
     unhealthy_threshold = 2
   }
 }

@@ -56,7 +56,7 @@ resource "aws_s3_bucket_cors_configuration" "filesrepo" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST", "GET"]
-    allowed_origins = ["*"]  # Restrict this in production
+    allowed_origins = ["*"] # Restrict this in production
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }
@@ -69,14 +69,14 @@ resource "aws_s3_bucket_policy" "filesrepo" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "LimitFileSize"
-        Effect = "Deny"
+        Sid       = "LimitFileSize"
+        Effect    = "Deny"
         Principal = "*"
-        Action = "s3:PutObject"
-        Resource = "${aws_s3_bucket.filesrepo.arn}/*"
+        Action    = "s3:PutObject"
+        Resource  = "${aws_s3_bucket.filesrepo.arn}/*"
         Condition = {
           NumericGreaterThan = {
-            "s3:content-length": 10485760  # 10MB in bytes
+            "s3:content-length" : 10485760 # 10MB in bytes
           }
         }
       }

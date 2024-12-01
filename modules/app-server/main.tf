@@ -131,7 +131,7 @@ resource "aws_lb" "app_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets           = var.public_subnet_ids
+  subnets            = var.public_subnet_ids
 
   tags = {
     Name = "${var.project_name}-alb"
@@ -149,10 +149,10 @@ resource "aws_lb_target_group" "app_tg" {
     enabled             = true
     healthy_threshold   = 2
     interval            = 30
-    matcher            = "200"
-    path               = "/"
-    port               = "traffic-port"
-    timeout            = 5
+    matcher             = "200"
+    path                = "/"
+    port                = "traffic-port"
+    timeout             = 5
     unhealthy_threshold = 2
   }
 }
