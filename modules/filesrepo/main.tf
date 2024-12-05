@@ -69,17 +69,69 @@ resource "aws_s3_bucket_policy" "filesrepo" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "LimitFileSize"
-        Effect    = "Deny"
-        Principal = "*"
-        Action    = "s3:PutObject"
-        Resource  = "${aws_s3_bucket.filesrepo.arn}/*"
+        Sid       = "AllowPresignedUrls"
+        Effect    = "Allow"
+        Principal = {
+          AWS = "*"
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Resource = "${aws_s3_bucket.filesrepo.arn}/*"
         Condition = {
-          NumericGreaterThan = {
-            "s3:content-length" : 10485760 # 10MB in bytes
+          StringEquals = {
+            "aws:PrincipalArn": [aws_iam_role.api_s3_role.arn]
           }
         }
       }
     ]
   })
+}
+
+# Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
+# Create IAM role for API
+resource "aws_iam_role" "api_s3_role" {
+  name = "${var.project_name}-${var.environment}-api-s3-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Create IAM policy for S3 presigned URLs
+resource "aws_iam_role_policy" "api_s3_policy" {
+  name = "${var.project_name}-${var.environment}-api-s3-policy"
+  role = aws_iam_role.api_s3_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.filesrepo.arn}/*"
+      }
+    ]
+  })
+}
+
+# Add output for the role ARN
+output "api_s3_role_arn" {
+  value = aws_iam_role.api_s3_role.arn
 } 

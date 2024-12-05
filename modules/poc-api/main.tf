@@ -45,6 +45,27 @@ resource "aws_iam_role_policy" "s3_access" {
   })
 }
 
+# Add permission to read database password from Secrets Manager
+resource "aws_iam_role_policy" "secrets_access" {
+  name = "secrets-access"
+  role = aws_iam_role.execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [
+          var.database_password_arn
+        ]
+      }
+    ]
+  })
+}
+
 # Security Groups
 resource "aws_security_group" "api_service" {
   name        = "${var.project_name}-api-service-${var.environment}"
@@ -165,6 +186,29 @@ resource "aws_ecs_task_definition" "api" {
         {
           name  = "AWS_DEFAULT_REGION"
           value = data.aws_region.current.name
+        },
+        {
+          name  = "DB_HOST"
+          value = var.db_host
+        },
+        {
+          name  = "DB_PORT"
+          value = "5432"
+        },
+        {
+          name  = "DB_NAME"
+          value = var.database_name
+        },
+        {
+          name  = "DB_USER"
+          value = var.database_username
+        }
+      ]
+
+      secrets = [
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = var.database_password_arn
         }
       ]
     }

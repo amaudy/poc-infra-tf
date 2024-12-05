@@ -47,4 +47,40 @@ variable "api_desired_count" {
   description = "Desired number of API tasks"
   type        = number
   default     = 2
+}
+
+# Database variables
+variable "database_name" {
+  description = "Name of the database"
+  type        = string
+}
+
+variable "database_username" {
+  description = "Database master username"
+  type        = string
+}
+
+variable "database_password_secret_arn" {
+  description = "ARN of the existing secret in AWS Secrets Manager containing the database password"
+  type        = string
+}
+
+variable "rds_instance_class" {
+  description = "RDS instance class"
+  type        = string
+}
+
+variable "rds_backup_retention_days" {
+  description = "Number of days to retain RDS backups"
+  type        = number
+}
+
+variable "rds_multi_az" {
+  description = "Enable Multi-AZ RDS deployment"
+  type        = bool
 } 
+
+variable "database_password_secret_name" {
+  description = "Name of the secret in AWS Secrets Manager containing the database password"
+  type        = string
+}

@@ -65,4 +65,24 @@ variable "filesrepo_bucket_name" {
 variable "filesrepo_bucket_arn" {
   description = "ARN of the S3 bucket for file storage"
   type        = string
+}
+
+variable "db_host" {
+  description = "Database host"
+  type        = string
+}
+
+variable "database_name" {
+  description = "Database name"
+  type        = string
+}
+
+variable "database_username" {
+  description = "Database username"
+  type        = string
+}
+
+variable "database_password_arn" {
+  description = "ARN of the database password secret"
+  type        = string
 } 
