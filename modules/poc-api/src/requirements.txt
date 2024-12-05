@@ -4,3 +4,8 @@ boto3
 python-multipart
 pydantic
 psycopg2-binary
+sqlalchemy>=2.0.0
+python-dotenv
+requests
+pytest
+httpx

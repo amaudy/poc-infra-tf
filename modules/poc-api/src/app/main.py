@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .routes import upload
+from .health.router import router as health_router
 
 app = FastAPI(title="POC API")
 
@@ -15,7 +16,4 @@ app.add_middleware(
 
 # Include routers
 app.include_router(upload.router, prefix="/api", tags=["upload"])
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"} 
+app.include_router(health_router, tags=["health"])
